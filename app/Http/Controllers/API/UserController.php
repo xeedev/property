@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
-class UserController extends Controller
+class UserController extends BaseController
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +16,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $user = User::where('is_admin',false)->get();
+
+        return $this->sendResponse(UserResource::collection($user), 'User retrieved successfully.');
     }
 
     /**
@@ -35,7 +39,23 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $input = $request->all();
+
+        $validator = Validator::make($input, [
+            'name'      =>  'required',
+            'email'     =>  'sometimes',
+            'is_admin'  =>  'sometimes',
+            'password'  =>  'sometimes',
+            'contact'   =>  'sometimes',
+            'notes'     =>  'sometimes',
+        ]);
+
+        if($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());
+        }
+
+        $user = User::create($input);
+        return $this->sendResponse(new UserResource($user), 'User created successfully.');
     }
 
     /**
@@ -44,9 +64,13 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(User $user)
     {
-        //
+        if (is_null($user)) {
+            return $this->sendError('User not found.');
+        }
+
+        return $this->sendResponse(new UserResource($user), 'User retrieved successfully.');
     }
 
     /**
@@ -67,9 +91,30 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, User $user)
     {
-        //
+        $input = $request->all();
+
+        $validator = Validator::make($input, [
+            'name'      =>  'required',
+            'email'     =>  'sometimes',
+            'is_admin'  =>  'sometimes',
+            'password'  =>  'sometimes',
+            'contact'   =>  'sometimes',
+            'notes'     =>  'sometimes',
+        ]);
+
+        if($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());
+        }
+
+        $user->name = $input['name'];
+        $user->email = $input['email'] ?? null;
+        $user->password = $input['password'] ?? null;
+        $user->contact = $input['contact'] ?? null;
+        $user->notes = $input['notes'] ?? null;
+        $user->save();
+        return $this->sendResponse(new UserResource($user), 'User updated successfully.');
     }
 
     /**
@@ -78,8 +123,9 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        //
+        $user->delete();
+        return $this->sendResponse([], 'User deleted successfully.');
     }
 }
