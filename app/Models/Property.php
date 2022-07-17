@@ -13,5 +13,7 @@ class Property extends Model
         'property_number',
         'detail',
         'status',
+        'sold_by_user_id',
+        'sold_to_user_id'
     ];
 }

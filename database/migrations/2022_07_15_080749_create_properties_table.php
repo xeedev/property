@@ -18,6 +18,12 @@ class CreatePropertiesTable extends Migration
             $table->string('property_number')->nullable();
             $table->text('detail')->nullable();
             $table->string('status')->nullable();
+            $table->unsignedBigInteger('location_id')->index()->nullable();
+            $table->foreign('location_id')->references('id')->on('locations');
+            $table->unsignedBigInteger('sold_by_user_id')->index()->nullable();
+            $table->foreign('sold_by_user_id')->references('id')->on('users');
+            $table->unsignedBigInteger('sold_to_user_id')->index()->nullable();
+            $table->foreign('sold_to_user_id')->references('id')->on('users');
             $table->timestamps();
         });
     }
