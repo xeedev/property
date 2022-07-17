@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
+use App\Http\Resources\LocationResource;
+use App\Models\Location;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
-class LocationController extends Controller
+class LocationController extends BaseController
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +16,9 @@ class LocationController extends Controller
      */
     public function index()
     {
-        //
+        $categories = Location::all();
+
+        return $this->sendResponse(LocationResource::collection($categories), 'Locations retrieved successfully.');
     }
 
     /**
@@ -35,7 +39,19 @@ class LocationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $input = $request->all();
+
+        $validator = Validator::make($input, [
+            'name' => 'required',
+            'detail' => 'sometimes',
+        ]);
+
+        if($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());
+        }
+
+        $category = Location::create($input);
+        return $this->sendResponse(new LocationResource($category), 'Location created successfully.');
     }
 
     /**
@@ -44,9 +60,13 @@ class LocationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Location $location)
     {
-        //
+        if (is_null($location)) {
+            return $this->sendError('Location not found.');
+        }
+
+        return $this->sendResponse(new LocationResource($location), 'Location retrieved successfully.');
     }
 
     /**
@@ -67,9 +87,23 @@ class LocationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Location $location)
     {
-        //
+        $input = $request->all();
+
+        $validator = Validator::make($input, [
+            'name' => 'required',
+            'detail' => 'sometimes',
+        ]);
+
+        if($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());
+        }
+
+        $location->name = $input['name'];
+        $location->detail = $input['detail'] ?? null;
+        $location->save();
+        return $this->sendResponse(new LocationResource($location), 'Location updated successfully.');
     }
 
     /**
@@ -78,8 +112,9 @@ class LocationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Location $location)
     {
-        //
+        $location->delete();
+        return $this->sendResponse([], 'Location deleted successfully.');
     }
 }

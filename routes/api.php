@@ -24,6 +24,7 @@ Route::post('register', [RegisterController::class, 'register']);
 Route::post('login', [RegisterController::class, 'login']);
 
 Route::middleware('auth:api')->group( function () {
+    Route::resource('locations', \App\Http\Controllers\API\LocationController::class);
     Route::post('logout', [RegisterController::class, 'logout']);
     Route::get('/validate-token', function (Request $request) {return response()->json(['authenticated' => true]);});
 });
