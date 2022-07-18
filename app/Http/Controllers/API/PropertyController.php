@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Resources\PropertyResource;
+use App\Models\Media;
 use App\Models\Property;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class PropertyController extends BaseController
@@ -54,6 +56,18 @@ class PropertyController extends BaseController
         }
 
         $property = Property::create($input);
+        if(!empty($request->uploadedImages)){
+            foreach($request->uploadedImages as $image){
+                Media::create(
+                    [
+                        'imageable_type' => Property::class,
+                        'imageable_id' => $property->id,
+                        'url' => $image
+                    ]
+                );
+            }
+        }
+
         return $this->sendResponse(new PropertyResource($property), 'Property created successfully.');
     }
 
@@ -128,4 +142,31 @@ class PropertyController extends BaseController
         $property->delete();
         return $this->sendResponse([], 'Property deleted successfully.');
     }
+
+    public function imageUpload(Request $request)
+    {
+        $files = $request->file('files');
+        $fileURLs = [];
+        $storagePath = 'public/media';
+
+        foreach ($files as $file) {
+            $fName = $this->generateRandomString();
+            $filename = time() . '-' . $fName . '.' . $file->getClientOriginalExtension();
+            $url = Storage::disk('local')->putFileAs($storagePath, $file, $filename);
+            $fileURLs[] = $url;
+        }
+        return response()->json(['status' => 'success', 'message' => 'file has been uploaded successfully', 'urls' => $fileURLs], 200);
+    }
+
+    private function generateRandomString($length = 10)
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
+
 }
