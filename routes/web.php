@@ -13,6 +13,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/{path}', \App\Http\Controllers\FrontendController::class)
+    ->where('path', '^(?!dashboard|admin|api|nova-api|pusher|nova-vendor).*');
