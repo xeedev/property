@@ -26,5 +26,6 @@ Route::middleware('auth:api')->group( function () {
     Route::post('imageUpload',[\App\Http\Controllers\API\PropertyController::class,'imageUpload']);
     Route::post('logout', [RegisterController::class, 'logout']);
     Route::get('/validate-token', function (Request $request) {return response()->json(['authenticated' => true]);});
+    Route::get('statistics',[\App\Http\Controllers\API\PropertyController::class,'getStatistics']);
 });
 

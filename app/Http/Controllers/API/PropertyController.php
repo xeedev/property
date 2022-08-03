@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Resources\PropertyResource;
+use App\Models\Location;
 use App\Models\Media;
 use App\Models\Property;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -167,6 +170,20 @@ class PropertyController extends BaseController
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
         return $randomString;
+    }
+
+    public function getStatistics(){
+        $customers = User::all();
+        $this->data['customers'] = $customers->count()-1;
+        $societies = Location::all();
+        $this->data['societies'] = $societies->count();
+        $properties = Property::all();
+        $this->data['properties'] = $properties->count();
+        $todaysDeals = Property::whereDate('created_at', Carbon::today())->get();
+        $this->data['todaysDeals'] = $todaysDeals->count();
+        $pendingDeals = Property::where('status', 'available')->get();
+        $this->data['pendingDeals'] = $pendingDeals->count();
+        return $this->data;
     }
 
 }
