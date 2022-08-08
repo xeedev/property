@@ -22,7 +22,7 @@ class RegisterController extends BaseController
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users',
             'password' => 'required',
             'c_password' => 'required|same:password',
         ]);
@@ -36,6 +36,7 @@ class RegisterController extends BaseController
         $user = User::create($input);
         $success['token'] =  $user->createToken('MyApp')->accessToken;
         $success['name'] =  $user->name;
+        $success['me'] = $user->is_admin;
 
         return $this->sendResponse($success, 'User register successfully.');
     }
@@ -54,7 +55,7 @@ class RegisterController extends BaseController
             $user = Auth::user();
             $success['token'] =  $user->createToken('MyApp')-> accessToken;
             $success['name'] =  $user->name;
-
+            $success['me'] = $user->is_admin;
             return $this->sendResponse($success, 'User login successfully.');
         }
         else{
