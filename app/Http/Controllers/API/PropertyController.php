@@ -131,6 +131,18 @@ class PropertyController extends BaseController
         $property->sold_by_user_id = $input['sold_by_user_id'] ?? null;
         $property->sold_to_user_id = $input['sold_to_user_id'] ?? null;
         $property->save();
+        $property->media()->delete();
+        if(!empty($request->uploadedImages)){
+            foreach($request->uploadedImages as $image){
+                Media::create(
+                    [
+                        'imageable_type' => Property::class,
+                        'imageable_id' => $property->id,
+                        'url' => $image
+                    ]
+                );
+            }
+        }
         return $this->sendResponse(new PropertyResource($property), 'Property updated successfully.');
     }
 
@@ -154,7 +166,7 @@ class PropertyController extends BaseController
 
         foreach ($files as $file) {
             $fName = $this->generateRandomString();
-            $filename = time() . '-' . $fName . '.' . $file->getClientOriginalExtension();
+            $filename = time() . '-' . $fName . '.' . $file->guessExtension();
             $url = Storage::disk('local')->putFileAs($storagePath, $file, $filename);
             $fileURLs[] = $url;
         }
