@@ -20,10 +20,13 @@ class CreatePropertiesTable extends Migration
             $table->string('status')->nullable();
             $table->unsignedBigInteger('location_id')->index()->nullable();
             $table->foreign('location_id')->references('id')->on('locations');
+            $table->unsignedBigInteger('block_id')->index()->nullable();
+            $table->foreign('block_id')->references('id')->on('blocks');
             $table->unsignedBigInteger('sold_by_user_id')->index()->nullable();
             $table->foreign('sold_by_user_id')->references('id')->on('users');
             $table->unsignedBigInteger('sold_to_user_id')->index()->nullable();
             $table->foreign('sold_to_user_id')->references('id')->on('users');
+            $table->decimal('demand', 12, 2)->nullable();
             $table->timestamps();
         });
     }
