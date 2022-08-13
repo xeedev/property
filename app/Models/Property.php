@@ -12,6 +12,7 @@ class Property extends Model
     protected $fillable = [
         'property_number',
         'location_id',
+        'block_id',
         'detail',
         'status',
         'sold_by_user_id',
@@ -19,6 +20,9 @@ class Property extends Model
     ];
     public function location(){
         return $this->belongsTo(Location::class);
+    }
+    public function block(){
+        return $this->belongsTo(Block::class);
     }
     public function sold_to(){
         return $this->belongsTo(User::class,'sold_to_user_id');
