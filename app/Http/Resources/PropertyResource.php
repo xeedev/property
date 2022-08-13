@@ -20,6 +20,7 @@ class PropertyResource extends JsonResource
             'detail' => $this->detail,
             'status' => $this->status,
             'location'  => $this->location,
+            'block'  => $this->block,
             'sold_by'  => $this->sold_by,
             'sold_to'  => $this->sold_to,
             'media' => $this->media,
