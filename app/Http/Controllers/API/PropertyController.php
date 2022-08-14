@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Resources\PropertyResource;
+use App\Models\lead;
 use App\Models\Location;
 use App\Models\Media;
 use App\Models\Property;
@@ -49,9 +50,14 @@ class PropertyController extends BaseController
             'property_number'   =>  'required',
             'location_id'       =>  'required',
             'detail'            =>  'sometimes',
+            'demand'            =>  'sometimes',
+            'negotiated_price'  =>  'sometimes',
+            'block_id'          =>  'sometimes',
             'status'            =>  'sometimes',
             'sold_by_user_id'   =>  'sometimes',
             'sold_to_user_id'   =>  'sometimes',
+            'sold_in'   =>  'sometimes',
+            'commission_received'   =>  'sometimes',
         ]);
 
         if($validator->fails()){
@@ -69,6 +75,17 @@ class PropertyController extends BaseController
                     ]
                 );
             }
+        }
+        if ($input['status'] == 'sold') {
+            lead::create([
+                'property_id' => $property->id,
+                'sold_to_user_id' => $input['sold_to_user_id'],
+                'sold_by_user_id' => $input['sold_by_user_id'],
+                'demand' => $input['demand'],
+                'sold_in' => $input['sold_in'],
+                'actual_commission_amount' => $input['sold_in'] != null && $input['sold_in'] !== 0 ? ((1/$input['sold_in'])*100) : 0,
+                'commission_received' => $input['commission_received'],
+            ]);
         }
 
         return $this->sendResponse(new PropertyResource($property), 'Property created successfully.');
@@ -100,13 +117,6 @@ class PropertyController extends BaseController
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, Property $property)
     {
         $input = $request->all();
@@ -116,19 +126,27 @@ class PropertyController extends BaseController
             'location_id'       =>  'required',
             'detail'            =>  'sometimes',
             'status'            =>  'sometimes',
+            'demand'            =>  'sometimes',
+            'negotiated_price'  =>  'sometimes',
+            'block_id'          =>  'sometimes',
             'sold_by_user_id'   =>  'sometimes',
             'sold_to_user_id'   =>  'sometimes',
+            'sold_in'   =>  'sometimes',
+            'commission_received'   =>  'sometimes',
         ]);
 
         if($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());
         }
-
+        $old_status = $property->status;
         $property->property_number = $input['property_number'];
         $property->location_id = $input['location_id'];
         $property->detail = $input['detail'] ?? null;
+        $property->demand = $input['demand'] ?? null;
+        $property->negotiated_price = $input['negotiated_price'] ?? null;
         $property->status = $input['status'] ?? null;
         $property->sold_by_user_id = $input['sold_by_user_id'] ?? null;
+        $property->block_id = $input['block_id'] ?? null;
         $property->sold_to_user_id = $input['sold_to_user_id'] ?? null;
         $property->save();
         $property->media()->delete();
@@ -142,6 +160,17 @@ class PropertyController extends BaseController
                     ]
                 );
             }
+        }
+        if ($old_status !== 'sold' && $property->status === 'sold') {
+            lead::create([
+                'property_id' => $property->id,
+                'sold_to_user_id' => $input['sold_to_user_id'],
+                'sold_by_user_id' => $input['sold_by_user_id'],
+                'demand' => $input['demand'],
+                'sold_in' => $input['sold_in'],
+                'actual_commission_amount' => ($input['sold_in'] !== null && $input['sold_in'] !== 0) ? (1/100)*$input['sold_in'] : 0,
+                'commission_received' => $input['commission_received'],
+            ]);
         }
         return $this->sendResponse(new PropertyResource($property), 'Property updated successfully.');
     }
