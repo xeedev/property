@@ -13,6 +13,8 @@ class Property extends Model
         'property_number',
         'location_id',
         'block_id',
+        'demand',
+        'negotiated_price',
         'detail',
         'status',
         'sold_by_user_id',
