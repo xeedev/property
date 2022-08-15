@@ -22,6 +22,7 @@ class PropertyResource extends JsonResource
             'negotiated_price' => $this->negotiated_price,
             'status' => $this->status,
             'location'  => $this->location,
+            'leads'  => $this->leads,
             'block'  => $this->block,
             'sold_by'  => $this->sold_by,
             'sold_to'  => $this->sold_to,
