@@ -23,6 +23,9 @@ class Property extends Model
     public function location(){
         return $this->belongsTo(Location::class);
     }
+    public function leads(){
+        return $this->hasMany(lead::class);
+    }
     public function block(){
         return $this->belongsTo(Block::class);
     }
