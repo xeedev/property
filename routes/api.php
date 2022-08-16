@@ -23,6 +23,7 @@ Route::middleware('auth:api')->group( function () {
     Route::resource('properties', \App\Http\Controllers\API\PropertyController::class);
     Route::resource('locations', \App\Http\Controllers\API\LocationController::class);
     Route::resource('blocks', \App\Http\Controllers\API\BlockController::class);
+    Route::resource('leads', \App\Http\Controllers\API\LeadController::class);
     Route::resource('users', \App\Http\Controllers\API\UserController::class);
     Route::post('imageUpload',[\App\Http\Controllers\API\PropertyController::class,'imageUpload']);
     Route::post('logout', [RegisterController::class, 'logout']);
