@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::get('/linkstorage', function () {
+    $exitCode = \Illuminate\Support\Facades\Artisan::call('storage:link', [] );
+    echo $exitCode;
+});
 Route::get('/{path}', \App\Http\Controllers\FrontendController::class)
     ->where('path', '^(?!dashboard|admin|api|nova-api|pusher|nova-vendor).*');
