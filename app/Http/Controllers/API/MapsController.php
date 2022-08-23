@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Resources\MapResource;
 use App\Models\Map;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class MapsController extends BaseController
@@ -51,8 +52,8 @@ class MapsController extends BaseController
             return $this->sendError('Validation Error.', $validator->errors());
         }
 
-        $category = Map::create($input);
-        return $this->sendResponse(new MapResource($category), 'Map created successfully.');
+        $map = Map::create($input);
+        return $this->sendResponse(new MapResource($map), 'Map created successfully.');
     }
 
     /**
@@ -119,5 +120,26 @@ class MapsController extends BaseController
     {
         $map->delete();
         return $this->sendResponse([], 'Map deleted successfully.');
+    }
+
+    public function fileUpload(Request $request)
+    {
+        $file = $request->file('file');
+        $storagePath = 'public/media';
+        $fName = $this->generateRandomString();
+        $filename = time() . '-' . $fName . '.' . $file->guessExtension();
+        $url = Storage::disk('local')->putFileAs($storagePath, $file, $filename);
+        return response()->json(['status' => 'success', 'message' => 'file has been uploaded successfully', 'url' => $url], 200);
+    }
+
+    private function generateRandomString($length = 10)
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
     }
 }
