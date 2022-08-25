@@ -4,22 +4,26 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Resources\MapResource;
 use App\Models\Map;
+use App\Traits\Searchable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class MapsController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        $maps = Map::all();
+    use Searchable;
 
-        return $this->sendResponse(MapResource::collection($maps), 'Maps retrieved successfully.');
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function index(Request $request)
+    {
+        $query = Map::query();
+        $this->applySearching($request, $query);
+        return MapResource::collection(
+            $query->paginate(10)
+        );
     }
 
     /**
